@@ -1,18 +1,28 @@
 {{{
 	BmpTest.kn v1.00 (for Kuin 1.00):
-		Last Modified: 2013/10/31 22:31:01.
+		Last Modified: 2014/02/09 22:35:45.
 		Created by Tatt(@tatt61880)
 		https://twitter.com/tatt61880
 		https://github.com/tatt61880
 }}}
 
-const InputFileName: []char :: "image.bmp"
 const PixelSize: float :: 5.0
 
+func Init(cfg: Kuin@CCfg)
+	do cfg.Title :: "BmpTest.exe"
+end func
+
 func Main()
+	var InputFileName: []char
+	if(Kuin@GetCmdLines().Len() > 1)
+		do InputFileName :: Kuin@GetCmdLines()[1]
+	else
+		do InputFileName :: "image.bmp"
+	end if
+	do Dbg@Log(InputFileName)
 	var img: Bmp@CImage
 	try
-		do img :: Bmp@Load(@InputFileName)
+		do img :: Bmp@Load(InputFileName)
 	catch()
 		while()
 			do Kuin@Act()
@@ -25,9 +35,9 @@ func Main()
 	var h: int :: img.Height()
 	for y(0, h - 1)
 		for x(0, w - 1)
-			do image_r.SetPixel(x, y, ([img.GetPixel(x, y).r, 0$ byte8, 0$ byte8, 255$ byte8]byte8)$ Bmp@CRgba)
-			do image_g.SetPixel(x, y, ([0$ byte8, img.GetPixel(x, y).g, 0$ byte8, 255$ byte8]byte8)$ Bmp@CRgba)
-			do image_b.SetPixel(x, y, ([0$ byte8, 0$ byte8, img.GetPixel(x, y).b, 255$ byte8]byte8)$ Bmp@CRgba)
+			do image_r.SetPixel(x, y, ([img.GetPixel(x, y).r, 0 $ byte8, 0 $ byte8, 255 $ byte8]) $ Bmp@CRgba)
+			do image_g.SetPixel(x, y, ([0 $ byte8, img.GetPixel(x, y).g, 0 $ byte8, 255 $ byte8]) $ Bmp@CRgba)
+			do image_b.SetPixel(x, y, ([0 $ byte8, 0 $ byte8, img.GetPixel(x, y).b, 255 $ byte8]) $ Bmp@CRgba)
 		end for
 	end for
 	do image_r.Save("image_r.bmp", Bmp@EFiletype#Bmp_24bit)
@@ -40,10 +50,10 @@ func Main()
 		for y(0, h - 1)
 			for x(0, w - 1)
 				do d :: img.GetPixel(x, h - y - 1)
-				do Draw@Rect(x$ float * @PixelSize, (y$ float + 1.0) * @PixelSize, @PixelSize, @PixelSize, d.r$ float / 255.0, d.g$ float / 255.0, d.b$ float / 255.0, d.a$ float / 255.0)
-				do Draw@Rect((x + w)$ float * @PixelSize, (y + 1)$ float * @PixelSize, @PixelSize, @PixelSize, d.r$ float / 255.0, 0.0, 0.0, d.a$ float / 255.0)
-				do Draw@Rect(x$ float * @PixelSize, (y + 1 + h)$ float * @PixelSize, @PixelSize, @PixelSize, 0.0, d.g$ float / 255.0, 0.0, d.a$ float / 255.0)
-				do Draw@Rect((x + w)$ float * @PixelSize, (y + 1 + h)$ float * @PixelSize, @PixelSize, @PixelSize, 0.0, 0.0, d.b$ float / 255.0, d.a$ float / 255.0)
+				do Draw@Rect(x $ float * @PixelSize, (y $ float + 1.0) * @PixelSize, @PixelSize, @PixelSize, d.r $ float / 255.0, d.g $ float / 255.0, d.b $ float / 255.0, d.a $ float / 255.0)
+				do Draw@Rect((x + w) $ float * @PixelSize, (y + 1) $ float * @PixelSize, @PixelSize, @PixelSize, d.r $ float / 255.0, 0.0, 0.0, d.a $ float / 255.0)
+				do Draw@Rect(x $ float * @PixelSize, (y + 1 + h) $ float * @PixelSize, @PixelSize, @PixelSize, 0.0, d.g $ float / 255.0, 0.0, d.a $ float / 255.0)
+				do Draw@Rect((x + w) $ float * @PixelSize, (y + 1 + h) $ float * @PixelSize, @PixelSize, @PixelSize, 0.0, 0.0, d.b $ float / 255.0, d.a $ float / 255.0)
 			end for
 		end for
 
