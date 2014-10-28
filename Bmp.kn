@@ -1,6 +1,6 @@
 {{{
 	Bmp.kn v1.02 (for Kuin 1.01):
-		Last Modified: 2014/10/29 04:41:26.
+		Last Modified: 2014/10/29 04:52:21.
 		Created by Tatt(@tatt61880)
 		https://twitter.com/tatt61880
 		https://github.com/tatt61880
@@ -83,8 +83,8 @@ class CImage()
 				end for
 			end for
 
-			var xSize: int :: me.width * me.dibh.Bpp() / 8
-			do xSize :+ (xSize % 4 = 0) ?(0, 4 - xSize % 4)
+			var xSize: int :: me.width * me.dibh.Bpp() / 8 + 3
+			do xSize :- xSize % 4
 
 			switch bpp(me.dibh.Bpp())
 			case(1)
@@ -157,8 +157,8 @@ class CImage()
 			end if
 			switch(type)
 			case(@EFiletype#Bmp_24bit)
-				var xSize: int :: 3 * img.Width()
-				do xSize :+ (xSize % 4 = 0) ?(0, 4 - xSize % 4)
+				var xSize: int :: 3 * img.Width() + 3
+				do xSize :- xSize % 4
 				var filesize: int :: 14 + 40 + xSize * img.Height()
 				var bin: []byte8 :: #[filesize]byte8
 				do bin[0] :: 'B' $ byte8
