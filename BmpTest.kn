@@ -1,6 +1,6 @@
 {{{
-	BmpTest.kn v1.00 (for Kuin 1.00):
-		Last Modified: 2014/02/09 22:35:45.
+	BmpTest.kn v1.01 (for Kuin 1.00):
+		Last Modified: 2014/10/29 04:41:44.
 		Created by Tatt(@tatt61880)
 		https://twitter.com/tatt61880
 		https://github.com/tatt61880
@@ -24,6 +24,7 @@ func Main()
 	try
 		do img :: Bmp@Load(InputFileName)
 	catch()
+		do Dbg@Log("LoadError")
 		while()
 			do Kuin@Act()
 		end while

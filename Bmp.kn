@@ -1,6 +1,6 @@
 {{{
-	Bmp.kn v1.01 (for Kuin 1.01):
-		Last Modified: 2014/02/09 22:36:48.
+	Bmp.kn v1.02 (for Kuin 1.01):
+		Last Modified: 2014/10/29 04:41:26.
 		Created by Tatt(@tatt61880)
 		https://twitter.com/tatt61880
 		https://github.com/tatt61880
@@ -157,7 +157,8 @@ class CImage()
 			end if
 			switch(type)
 			case(@EFiletype#Bmp_24bit)
-				var xSize: int :: 3 * img.Width() + (((img.Width() * 3) % 3 = 0) ?(0, 4 - img.Width() * 3))
+				var xSize: int :: 3 * img.Width()
+				do xSize :+ (xSize % 4 = 0) ?(0, 4 - xSize % 4)
 				var filesize: int :: 14 + 40 + xSize * img.Height()
 				var bin: []byte8 :: #[filesize]byte8
 				do bin[0] :: 'B' $ byte8
@@ -241,7 +242,7 @@ class CImage()
 		end class
 
 		class cDibHeader()
-			-var thisHeaderSize: int
+			-var meHeaderSize: int
 			var width: int
 			var height: int
 			-var planeNum: int
@@ -256,10 +257,10 @@ class CImage()
 				{
 				do Dbg@Log("[Bmp.kn] ※Tell() = 0x" ~ stream.Tell().ToStrF("x"))
 				}
-				do me.thisHeaderSize :: (stream.Read(4) ~ #[4]byte8) $ int
-				if(me.thisHeaderSize <> 40)
+				do me.meHeaderSize :: (stream.Read(4) ~ #[4]byte8) $ int
+				if(me.meHeaderSize <> 40)
 					do Dbg@Log("[Bmp.kn] BITMAPINFOHEADER以外の情報ヘッダを持つBMP画像には未対応です。")
-					do Dbg@Log("[Bmp.kn] ヘッダサイズ: " ~ me.thisHeaderSize.ToStr())
+					do Dbg@Log("[Bmp.kn] ヘッダサイズ: " ~ me.meHeaderSize.ToStr())
 					assert false
 				end if
 				do me.width :: (stream.Read(4) ~ #[4]byte8) $ int
@@ -326,6 +327,37 @@ class CRgba()
 	var g: byte8
 	var b: byte8
 	var a: byte8
+	-+func Cmp(t: Kuin@CClass): int
+		var tt: @CRgba :: t $ @CRgba
+		if(me.r = tt.r & me.g = tt.g & me.b = tt.b & me.a = tt.a)
+			return 0
+		end if
+		if(me.r > tt.r)
+			return 1
+		end if
+		if(me.r < tt.r)
+			return -1
+		end if
+		if(me.g > tt.g)
+			return 1
+		end if
+		if(me.g < tt.g)
+			return -1
+		end if
+		if(me.b > tt.b)
+			return 1
+		end if
+		if(me.b < tt.b)
+			return -1
+		end if
+		if(me.a > tt.a)
+			return 1
+		end if
+		if(me.a < tt.a)
+			return -1
+		end if
+		return 0
+	end func
 end class
 
 enum EFiletype

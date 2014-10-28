@@ -1,5 +1,5 @@
-Bmp.kn v1.01 (for Kuin 1.01):
-	Last Modified: 2014/02/09 22:29:11.
+Bmp.kn v1.02 (for Kuin 1.01):
+	Last Modified: 2014/10/29 04:41:53.
 	Created by Tatt(@tatt61880)
 	https://twitter.com/tatt61880
 	https://github.com/tatt61880
