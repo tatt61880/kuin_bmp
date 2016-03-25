@@ -1,6 +1,6 @@
 {{{
 	Bmp.kn v1.02 (for Kuin 1.01):
-		Last Modified: 2015/01/01 14:30:36.
+		Last Modified: 2016/03/26 04:19:21.
 		Created by Tatt(@tatt61880)
 		https://twitter.com/tatt61880
 		https://github.com/tatt61880
@@ -253,7 +253,9 @@ class CImage()
 				do me.reserved1 :: stream.Read(2)
 				do me.reserved2 :: stream.Read(2)
 				do me.offset :: (stream.Read(4) ~ #[4]byte8) $ int
+				{
 				do Dbg@Log("[Bmp.kn] filesize = " ~ (me.filesize).ToStr() ~ "byte")
+				}
 				return me
 			end func
 		end class
@@ -282,7 +284,9 @@ class CImage()
 				end if
 				do me.width :: (stream.Read(4) ~ #[4]byte8) $ int
 				do me.height :: (stream.Read(4) ~ #[4]byte8) $ int
+				{
 				do Dbg@Log("[Bmp.kn] width = " ~ me.width.ToStr() ~ ", height = " ~ me.height.ToStr())
+				}
 				do me.planeNum :: (stream.Read(2) ~ #[6]byte8) $ int
 				do me.bpp :: (stream.Read(2) ~ #[6]byte8) $ int
 				do me.compressMethod :: (stream.Read(4) ~ #[4]byte8) $ eCompressMethod
@@ -295,7 +299,9 @@ class CImage()
 				do me.colResolution :: (stream.Read(4) ~ #[4]byte8) $ int
 				do me.colorNum :: (stream.Read(4) ~ #[4]byte8) $ int
 				do me.importantColor :: (stream.Read(4) ~ #[4]byte8) $ int
+				{
 				do Dbg@Log("[Bmp.kn] bpp = " ~ (me.bpp).ToStr())
+				}
 
 				return me
 			end func

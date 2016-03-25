@@ -1,6 +1,6 @@
 {{{
 	BmpSample.kn v1.01 (for Kuin 1.00):
-		Last Modified: 2016/03/26 02:10:35.
+		Last Modified: 2016/03/26 04:17:53.
 		Created by Tatt(@tatt61880)
 		https://twitter.com/tatt61880
 		https://github.com/tatt61880
@@ -19,7 +19,7 @@ func Main()
 	else
 		do InputFileName :: "image.bmp"
 	end if
-	do Dbg@Log(InputFileName)
+	do Dbg@Log("InputFileName: " ~ InputFileName)
 	var img: Bmp@CImage
 	try
 		do img :: Bmp@Load(InputFileName)
