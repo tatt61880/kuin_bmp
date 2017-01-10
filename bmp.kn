@@ -1,6 +1,6 @@
 {{{
 	bmp.kn
-		Last Modified: 2017/01/11 00:27:34.
+		Last Modified: 2017/01/11 01:05:01.
 		Created by Tatt(@tatt61880)
 		https://twitter.com/tatt61880
 		https://github.com/tatt61880
@@ -40,7 +40,7 @@ end func
 			do me.height :: bmp.getHeight()
 			do me.data :: bmp.getData()
 		else
-			do cui@print("[Bmp.kn] Windows用のBMP形式画像（マジックナンバー=BM）以外には未対応です。\n")
+			do cui@print("[bmp.kn] Windows用のBMP形式画像（マジックナンバー=BM）以外には未対応です。\n")
 			assert false
 		end if
 		ret me
@@ -88,7 +88,7 @@ end func
 			case(24)
 			case(32)
 			default
-				do cui@print("[Bmp.kn] 1ピクセルあたりのビット数(bpp: bit per pixel)が異常です。\n")
+				do cui@print("[bmp.kn] 1ピクセルあたりのビット数(bpp: bit per pixel)が異常です。\n")
 				assert false
 			end switch
 
@@ -161,7 +161,7 @@ end func
 					end for
 				end for
 			default
-				do cui@print("[Bmp.kn] 1ピクセルあたりのビット数(bpp: bit per pixel)が異常です。\n")
+				do cui@print("[bmp.kn] 1ピクセルあたりのビット数(bpp: bit per pixel)が異常です。\n")
 				assert false
 			end switch
 
@@ -224,9 +224,9 @@ end func
 				ret true
 			default
 				{
-				do stream.writeStr("[Bmp.kn] 指定されたファイル形式での保存は未実装です。") {TODO}
+				do stream.writeStr("[bmp.kn] 指定されたファイル形式での保存は未実装です。") {TODO}
 				}
-				do cui@print("[Bmp.kn] 指定されたファイル形式での保存は未実装です。")
+				do cui@print("[bmp.kn] 指定されたファイル形式での保存は未実装です。")
 				ret false
 			end switch
 		end func
@@ -258,7 +258,7 @@ end func
 				do me.reserved2 :: stream.read(2)
 				do me.offset.fromBin(stream.read(4) ~ #[4]bit8, 0)
 				{
-				do cui@print("[Bmp.kn] filesize = " ~ (me.filesize).toStr() ~ "byte\n")
+				do cui@print("[bmp.kn] filesize = " ~ (me.filesize).toStr() ~ "byte\n")
 				}
 				ret me
 			end func
@@ -278,24 +278,24 @@ end func
 			var importantColor: int
 			+func read(stream: file@Reader): DibHeader
 				{
-				do cui@print("[Bmp.kn] ※Tell() = 0x" ~ stream.Tell().ToStrF("x") ~ "\n")
+				do cui@print("[bmp.kn] ※Tell() = 0x" ~ stream.Tell().ToStrF("x") ~ "\n")
 				}
 				do me.meHeaderSize.fromBin(stream.read(4) ~ #[4]bit8, 0)
 				if(me.meHeaderSize <> 40)
-					do cui@print("[Bmp.kn] BITMAPINFOHEADER以外の情報ヘッダを持つBMP画像には未対応です。\n")
-					do cui@print("[Bmp.kn] ヘッダサイズ: " ~ me.meHeaderSize.toStr() ~ "\n")
+					do cui@print("[bmp.kn] BITMAPINFOHEADER以外の情報ヘッダを持つBMP画像には未対応です。\n")
+					do cui@print("[bmp.kn] ヘッダサイズ: " ~ me.meHeaderSize.toStr() ~ "\n")
 					assert false
 				end if
 				do me.width.fromBin(stream.read(4) ~ #[4]bit8, 0)
 				do me.height.fromBin(stream.read(4) ~ #[4]bit8, 0)
 				{
-				do cui@print("[Bmp.kn] width = " ~ me.width.toStr() ~ ", height = " ~ me.height.toStr() ~ "\n")
+				do cui@print("[bmp.kn] width = " ~ me.width.toStr() ~ ", height = " ~ me.height.toStr() ~ "\n")
 				}
 				do me.planeNum.fromBin(stream.read(2) ~ #[6]bit8, 0)
 				do me.bpp.fromBin(stream.read(2) ~ #[6]bit8, 0)
 				do me.compressMethod.fromBin(stream.read(4) ~ #[4]bit8, 0)
 				if(me.compressMethod <> CompressMethod#BI_RGB)
-					do cui@print("[Bmp.kn] BI_RGB以外の圧縮形式のBMP画像には未対応です。\n")
+					do cui@print("[bmp.kn] BI_RGB以外の圧縮形式のBMP画像には未対応です。\n")
 					assert false
 				end if
 				do me.imgSize.fromBin(stream.read(4) ~ #[4]bit8, 0)
@@ -304,7 +304,7 @@ end func
 				do me.colorNum.fromBin(stream.read(4) ~ #[4]bit8, 0)
 				do me.importantColor.fromBin(stream.read(4) ~ #[4]bit8, 0)
 				{
-				do cui@print("[Bmp.kn] bpp = " ~ (me.bpp).toStr() ~ "\n")
+				do cui@print("[bmp.kn] bpp = " ~ (me.bpp).toStr() ~ "\n")
 				}
 
 				ret me
