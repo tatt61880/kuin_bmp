@@ -1,6 +1,6 @@
 {{{
 	bmp_sample.kn
-		Last Modified: 2017/01/11 00:30:07.
+		Last Modified: 2017/01/11 00:57:10.
 		Created by Tatt(@tatt61880)
 		https://twitter.com/tatt61880
 		https://github.com/tatt61880
@@ -10,8 +10,8 @@ const pixelSize: float :: 5.0
 
 func main()
 	var inputFileName: []char
-	if(^cui@cmdLine() > 1)
-		do inputFileName :: cui@cmdLine()[1]
+	if(^cui@cmdLine() > 0)
+		do inputFileName :: cui@cmdLine()[0]
 	else
 		do inputFileName :: "image.bmp"
 	end if
