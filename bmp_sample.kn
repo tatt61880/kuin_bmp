@@ -1,0 +1,40 @@
+{{{
+	bmp_sample.kn
+		Last Modified: 2017/01/11 00:30:07.
+		Created by Tatt(@tatt61880)
+		https://twitter.com/tatt61880
+		https://github.com/tatt61880
+}}}
+
+const pixelSize: float :: 5.0
+
+func main()
+	var inputFileName: []char
+	if(^cui@cmdLine() > 1)
+		do inputFileName :: cui@cmdLine()[1]
+	else
+		do inputFileName :: "image.bmp"
+	end if
+	do cui@print("inputFileName: " ~ inputFileName ~ "\n")
+	var img: \bmp@Image
+	try
+		do img :: \bmp@load(inputFileName)
+	catch
+		do cui@print("LoadError\n")
+	end try
+	var image_r: \bmp@Image :: ##img
+	var image_g: \bmp@Image :: ##img
+	var image_b: \bmp@Image :: ##img
+	var w: int :: img.getWidth()
+	var h: int :: img.getHeight()
+	for y(0, h - 1)
+		for x(0, w - 1)
+			do image_r.setPixel(x, y, (#\bmp@Rgba).init(img.getPixel(x, y).r, 0b8, 0b8, 255b8))
+			do image_g.setPixel(x, y, (#\bmp@Rgba).init(0b8, img.getPixel(x, y).g, 0b8, 255b8))
+			do image_b.setPixel(x, y, (#\bmp@Rgba).init(0b8, 0b8, img.getPixel(x, y).b, 255b8))
+		end for
+	end for
+	do image_r.save("image_r.bmp", \bmp@Filetype#bmp24bit)
+	do image_g.save("image_g.bmp", \bmp@Filetype#bmp24bit)
+	do image_b.save("image_b.bmp", \bmp@Filetype#bmp24bit)
+end func
