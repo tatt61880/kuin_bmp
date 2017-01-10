@@ -1,6 +1,6 @@
 {{{
 	bmp.kn
-		Last Modified: 2017/01/11 01:05:01.
+		Last Modified: 2017/01/11 01:14:07.
 		Created by Tatt(@tatt61880)
 		https://twitter.com/tatt61880
 		https://github.com/tatt61880
@@ -48,7 +48,7 @@ end func
 
 	+func save(path: []char, type: @Filetype): bool
 		switch(type)
-		case(@Filetype#bmp24bit)
+		case @Filetype#bmp24bit
 			ret (#Bmp).save(me, path, type)
 		end switch
 		ret false
@@ -64,35 +64,35 @@ end func
 		var palette: []@Rgba
 
 		+func load(path: []char): Bmp
-			var stream: file@Reader :: file@makeReader(path)
-			if(stream =& null)
+			var reader: file@Reader :: file@makeReader(path)
+			if(reader =& null)
 				ret null
 			end if
-			do me.bmph :: (#BitmapFileHeader).read(stream)
-			do me.dibh :: (#DibHeader).read(stream)
+			do me.bmph :: (#BitmapFileHeader).read(reader)
+			do me.dibh :: (#DibHeader).read(reader)
 			do me.width :: me.dibh.width
 			do me.height :: me.dibh.height
 
-			{streamからカラーパレットを読み込む}
+			{readerからカラーパレットを読み込む}
 			switch bpp(me.dibh.getBpp())
 			case 1, 2, 4, 8, 16
 				do me.palette :: #[2 ^ bpp]@Rgba
 				for i(0, 2^bpp - 1)
 					do me.palette[i] :: #@Rgba
-					do me.palette[i].b :: stream.read(1)[0]
-					do me.palette[i].g :: stream.read(1)[0]
-					do me.palette[i].r :: stream.read(1)[0]
+					do me.palette[i].b :: reader.read(1)[0]
+					do me.palette[i].g :: reader.read(1)[0]
+					do me.palette[i].r :: reader.read(1)[0]
 					do me.palette[i].a :: 255 $ bit8
-					do stream.read(1)
+					do reader.read(1)
 				end for
-			case(24)
-			case(32)
+			case 24
+			case 32
 			default
 				do cui@print("[bmp.kn] 1ピクセルあたりのビット数(bpp: bit per pixel)が異常です。\n")
 				assert false
 			end switch
 
-			{streamからbitmapを読み込む}
+			{readerからbitmapを読み込む}
 			do me.data :: #[me.height][]@Rgba
 			for y(0, me.height - 1)
 				do me.data[y] :: #[me.width]@Rgba
@@ -105,44 +105,44 @@ end func
 			do xSize :- xSize % 4
 
 			switch bpp(me.dibh.getBpp())
-			case(1)
+			case 1
 				for y(0, me.height - 1)
-					var bin: []bit8 :: stream.read(xSize)
+					var bin: []bit8 :: reader.read(xSize)
 					for x(0, me.width - 1)
 						do me.data[y][x] :: me.palette[bin[x / 8].shr(7 - x % 8).and(1 $ bit8) $ int]
 					end for
 				end for
-			case(2)
+			case 2
 				for y(0, me.height - 1)
-					var bin: []bit8 :: stream.read(xSize)
+					var bin: []bit8 :: reader.read(xSize)
 					for x(0, me.width - 1)
 						do me.data[y][x] :: me.palette[bin[x / 4].shr((3 - x % 4) * 2).and(3 $ bit8) $ int]
 					end for
 				end for
-			case(4)
+			case 4
 				for y(0, me.height - 1)
-					var bin: []bit8 :: stream.read(xSize)
+					var bin: []bit8 :: reader.read(xSize)
 					for x(0, me.width - 1)
 						do me.data[y][x] :: me.palette[bin[x / 2].shr((1 - x % 2) * 4).and(15 $ bit8) $ int]
 					end for
 				end for
-			case(8)
+			case 8
 				for y(0, me.height - 1)
-					var bin: []bit8 :: stream.read(xSize)
+					var bin: []bit8 :: reader.read(xSize)
 					for x(0, me.width - 1)
 						do me.data[y][x] :: me.palette[bin[x] $ int]
 					end for
 				end for
-			case(16)
+			case 16
 				for y(0, me.height - 1)
-					var bin: []bit8 :: stream.read(xSize)
+					var bin: []bit8 :: reader.read(xSize)
 					for x(0, me.width - 1)
 						do me.data[y][x] :: me.palette[bin[2 * x] $ int + bin[2 * x + 1] $ int * 255]
 					end for
 				end for
-			case(24)
+			case 24
 				for y(0, me.height - 1)
-					var bin: []bit8 :: stream.read(xSize)
+					var bin: []bit8 :: reader.read(xSize)
 					for x(0, me.width - 1)
 						do me.data[y][x].b :: bin[3 * x + 0]
 						do me.data[y][x].g :: bin[3 * x + 1]
@@ -150,9 +150,9 @@ end func
 						do me.data[y][x].a :: 255 $ bit8 {不透明}
 					end for
 				end for
-			case(32)
+			case 32
 				for y(0, me.height - 1)
-					var bin: []bit8 :: stream.read(xSize)
+					var bin: []bit8 :: reader.read(xSize)
 					for x(0, me.width - 1)
 						do me.data[y][x].b :: bin[4 * x + 0]
 						do me.data[y][x].g :: bin[4 * x + 1]
@@ -169,12 +169,12 @@ end func
 		end func
 
 		+func save(img: @Image, path: []char, type: @Filetype): bool
-			var stream: file@Writer :: file@makeWriter(path, false)
-			if(stream =& null)
+			var reader: file@Writer :: file@makeWriter(path, false)
+			if(reader =& null)
 				ret false
 			end if
 			switch(type)
-			case(@Filetype#bmp24bit)
+			case @Filetype#bmp24bit
 				var xSize: int :: 3 * img.getWidth() + 3
 				do xSize :- xSize % 4
 				var filesize: int :: 14 + 40 + xSize * img.getHeight()
@@ -220,11 +220,11 @@ end func
 						do bin[offset + 2] :: p.r
 					end for
 				end for
-				do stream.write(bin)
+				do reader.write(bin)
 				ret true
 			default
 				{
-				do stream.writeStr("[bmp.kn] 指定されたファイル形式での保存は未実装です。") {TODO}
+				do reader.writeStr("[bmp.kn] 指定されたファイル形式での保存は未実装です。") {TODO}
 				}
 				do cui@print("[bmp.kn] 指定されたファイル形式での保存は未実装です。")
 				ret false
@@ -250,13 +250,13 @@ end func
 			var reserved2: []bit8
 			var offset: int
 
-			+func read(stream: file@Reader): BitmapFileHeader
-				do stream.setPos(file@Origin#head, 0)
-				do me.id :: stream.read(2)
-				do me.filesize.fromBin(stream.read(4) ~ #[4]bit8, 0)
-				do me.reserved1 :: stream.read(2)
-				do me.reserved2 :: stream.read(2)
-				do me.offset.fromBin(stream.read(4) ~ #[4]bit8, 0)
+			+func read(reader: file@Reader): BitmapFileHeader
+				do reader.setPos(file@Origin#head, 0)
+				do me.id :: reader.read(2)
+				do me.filesize.fromBin(reader.read(4) ~ #[4]bit8, 0)
+				do me.reserved1 :: reader.read(2)
+				do me.reserved2 :: reader.read(2)
+				do me.offset.fromBin(reader.read(4) ~ #[4]bit8, 0)
 				{
 				do cui@print("[bmp.kn] filesize = " ~ (me.filesize).toStr() ~ "byte\n")
 				}
@@ -276,37 +276,36 @@ end func
 			var colResolution: int
 			var colorNum: int
 			var importantColor: int
-			+func read(stream: file@Reader): DibHeader
+			+func read(reader: file@Reader): DibHeader
 				{
-				do cui@print("[bmp.kn] ※Tell() = 0x" ~ stream.Tell().ToStrF("x") ~ "\n")
+				do cui@print("[bmp.kn] reader.getPos() = " ~ reader.getPos().toStr() ~ "\n")
 				}
-				do me.meHeaderSize.fromBin(stream.read(4) ~ #[4]bit8, 0)
+				do me.meHeaderSize.fromBin(reader.read(4) ~ #[4]bit8, 0)
 				if(me.meHeaderSize <> 40)
 					do cui@print("[bmp.kn] BITMAPINFOHEADER以外の情報ヘッダを持つBMP画像には未対応です。\n")
 					do cui@print("[bmp.kn] ヘッダサイズ: " ~ me.meHeaderSize.toStr() ~ "\n")
 					assert false
 				end if
-				do me.width.fromBin(stream.read(4) ~ #[4]bit8, 0)
-				do me.height.fromBin(stream.read(4) ~ #[4]bit8, 0)
+				do me.width.fromBin(reader.read(4) ~ #[4]bit8, 0)
+				do me.height.fromBin(reader.read(4) ~ #[4]bit8, 0)
 				{
 				do cui@print("[bmp.kn] width = " ~ me.width.toStr() ~ ", height = " ~ me.height.toStr() ~ "\n")
 				}
-				do me.planeNum.fromBin(stream.read(2) ~ #[6]bit8, 0)
-				do me.bpp.fromBin(stream.read(2) ~ #[6]bit8, 0)
-				do me.compressMethod.fromBin(stream.read(4) ~ #[4]bit8, 0)
+				do me.planeNum.fromBin(reader.read(2) ~ #[6]bit8, 0)
+				do me.bpp.fromBin(reader.read(2) ~ #[6]bit8, 0)
+				do me.compressMethod.fromBin(reader.read(4) ~ #[4]bit8, 0)
 				if(me.compressMethod <> CompressMethod#BI_RGB)
 					do cui@print("[bmp.kn] BI_RGB以外の圧縮形式のBMP画像には未対応です。\n")
 					assert false
 				end if
-				do me.imgSize.fromBin(stream.read(4) ~ #[4]bit8, 0)
-				do me.horResolution.fromBin(stream.read(4) ~ #[4]bit8, 0)
-				do me.colResolution.fromBin(stream.read(4) ~ #[4]bit8, 0)
-				do me.colorNum.fromBin(stream.read(4) ~ #[4]bit8, 0)
-				do me.importantColor.fromBin(stream.read(4) ~ #[4]bit8, 0)
+				do me.imgSize.fromBin(reader.read(4) ~ #[4]bit8, 0)
+				do me.horResolution.fromBin(reader.read(4) ~ #[4]bit8, 0)
+				do me.colResolution.fromBin(reader.read(4) ~ #[4]bit8, 0)
+				do me.colorNum.fromBin(reader.read(4) ~ #[4]bit8, 0)
+				do me.importantColor.fromBin(reader.read(4) ~ #[4]bit8, 0)
 				{
 				do cui@print("[bmp.kn] bpp = " ~ (me.bpp).toStr() ~ "\n")
 				}
-
 				ret me
 			end func
 
@@ -326,8 +325,8 @@ end func
 		end class
 
 		+func isBmp(path: []char): bool
-			var stream: file@Reader :: file@makeReader(path)
-			var id: []bit8 :: stream.read(2)
+			var reader: file@Reader :: file@makeReader(path)
+			var id: []bit8 :: reader.read(2)
 			ret ((id[0] $ char) = 'B' & (id[1] $ char) = 'M')
 		end func
 	end class
