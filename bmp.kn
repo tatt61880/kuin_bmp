@@ -1,6 +1,6 @@
 {{{
 	bmp.kn
-		Last Modified: 2017/01/11 01:14:07.
+		Last Modified: 2017/04/22 19:05:25.
 		Created by Tatt(@tatt61880)
 		https://twitter.com/tatt61880
 		https://github.com/tatt61880
@@ -48,7 +48,7 @@ end func
 
 	+func save(path: []char, type: @Filetype): bool
 		switch(type)
-		case @Filetype#bmp24bit
+		case %bmp24bit
 			ret (#Bmp).save(me, path, type)
 		end switch
 		ret false
@@ -174,22 +174,22 @@ end func
 				ret false
 			end if
 			switch(type)
-			case @Filetype#bmp24bit
+			case %bmp24bit
 				var xSize: int :: 3 * img.getWidth() + 3
 				do xSize :- xSize % 4
 				var filesize: int :: 14 + 40 + xSize * img.getHeight()
 				var bin: []bit8 :: #[filesize]bit8
 				do bin[0] :: 'B' $ bit8
 				do bin[1] :: 'M' $ bit8
-				var binFilesize: []bit8 :: filesize.toBin()
+				var binFilesize: []bit8 :: @int2bin(filesize)
 				do bin[2] :: binFilesize[0]
 				do bin[3] :: binFilesize[1]
 				do bin[4] :: binFilesize[2]
 				do bin[5] :: binFilesize[3]
 				do bin[10] :: 54b8 {ファイル先頭からデータ先頭までのオフセット}
 				do bin[14] :: 40b8 {情報ヘッダのサイズ}
-				var binWidth: []bit8 :: img.getWidth().toBin()
-				var binHeight: []bit8 :: img.getHeight().toBin()
+				var binWidth: []bit8 :: @int2bin(img.getWidth())
+				var binHeight: []bit8 :: @int2bin(img.getHeight())
 				do bin[18] :: binWidth[0]
 				do bin[19] :: binWidth[1]
 				do bin[20] :: binWidth[2]
@@ -200,7 +200,7 @@ end func
 				do bin[25] :: binHeight[3]
 				do bin[26] :: 1b8
 				do bin[28] :: 24b8 {bpp}
-				var binDatasize: []bit8 :: (xSize * img.getHeight()).toBin()
+				var binDatasize: []bit8 :: @int2bin(xSize * img.getHeight())
 				do bin[34] :: binDatasize[0]
 				do bin[35] :: binDatasize[1]
 				do bin[36] :: binDatasize[2]
@@ -251,15 +251,13 @@ end func
 			var offset: int
 
 			+func read(reader: file@Reader): BitmapFileHeader
-				do reader.setPos(file@Origin#head, 0)
+				do reader.setPos(%head, 0)
 				do me.id :: reader.read(2)
-				do me.filesize.fromBin(reader.read(4) ~ #[4]bit8, 0)
+				do me.filesize :: @bin2int(reader.read(4))
 				do me.reserved1 :: reader.read(2)
 				do me.reserved2 :: reader.read(2)
-				do me.offset.fromBin(reader.read(4) ~ #[4]bit8, 0)
-				{
-				do cui@print("[bmp.kn] filesize = " ~ (me.filesize).toStr() ~ "byte\n")
-				}
+				do me.offset :: @bin2int(reader.read(4))
+				;do cui@print("[bmp.kn] filesize = " ~ (me.filesize).toStr() ~ "byte\n")
 				ret me
 			end func
 		end class
@@ -277,35 +275,29 @@ end func
 			var colorNum: int
 			var importantColor: int
 			+func read(reader: file@Reader): DibHeader
-				{
-				do cui@print("[bmp.kn] reader.getPos() = " ~ reader.getPos().toStr() ~ "\n")
-				}
-				do me.meHeaderSize.fromBin(reader.read(4) ~ #[4]bit8, 0)
+				;do cui@print("[bmp.kn] reader.getPos() = " ~ reader.getPos().toStr() ~ "\n")
+				do me.meHeaderSize :: @bin2int(reader.read(4))
 				if(me.meHeaderSize <> 40)
 					do cui@print("[bmp.kn] BITMAPINFOHEADER以外の情報ヘッダを持つBMP画像には未対応です。\n")
 					do cui@print("[bmp.kn] ヘッダサイズ: " ~ me.meHeaderSize.toStr() ~ "\n")
 					assert false
 				end if
-				do me.width.fromBin(reader.read(4) ~ #[4]bit8, 0)
-				do me.height.fromBin(reader.read(4) ~ #[4]bit8, 0)
-				{
-				do cui@print("[bmp.kn] width = " ~ me.width.toStr() ~ ", height = " ~ me.height.toStr() ~ "\n")
-				}
-				do me.planeNum.fromBin(reader.read(2) ~ #[6]bit8, 0)
-				do me.bpp.fromBin(reader.read(2) ~ #[6]bit8, 0)
-				do me.compressMethod.fromBin(reader.read(4) ~ #[4]bit8, 0)
-				if(me.compressMethod <> CompressMethod#BI_RGB)
+				do me.width :: @bin2int(reader.read(4))
+				do me.height :: @bin2int(reader.read(4))
+				;do cui@print("[bmp.kn] width = " ~ me.width.toStr() ~ ", height = " ~ me.height.toStr() ~ "\n")
+				do me.planeNum :: @bin2int(reader.read(2))
+				do me.bpp :: @bin2int(reader.read(2))
+				do me.compressMethod :: @bin2int(reader.read(4)) $ CompressMethod
+				if(me.compressMethod <> %BI_RGB)
 					do cui@print("[bmp.kn] BI_RGB以外の圧縮形式のBMP画像には未対応です。\n")
 					assert false
 				end if
-				do me.imgSize.fromBin(reader.read(4) ~ #[4]bit8, 0)
-				do me.horResolution.fromBin(reader.read(4) ~ #[4]bit8, 0)
-				do me.colResolution.fromBin(reader.read(4) ~ #[4]bit8, 0)
-				do me.colorNum.fromBin(reader.read(4) ~ #[4]bit8, 0)
-				do me.importantColor.fromBin(reader.read(4) ~ #[4]bit8, 0)
-				{
-				do cui@print("[bmp.kn] bpp = " ~ (me.bpp).toStr() ~ "\n")
-				}
+				do me.imgSize :: @bin2int(reader.read(4))
+				do me.horResolution :: @bin2int(reader.read(4))
+				do me.colResolution :: @bin2int(reader.read(4))
+				do me.colorNum :: @bin2int(reader.read(4))
+				do me.importantColor :: @bin2int(reader.read(4))
+				;do cui@print("[bmp.kn] bpp = " ~ (me.bpp).toStr() ~ "\n")
 				ret me
 			end func
 
@@ -401,3 +393,24 @@ end class
 	bmp24bit
 	bmp32bit
 end enum
+
+func bin2int(bin: []bit8): int
+	var retVal: int :: 0
+	var x: int :: 1
+	foreach b(bin)
+		do retVal :+ b $ int
+		do x :* 256
+	end foreach
+	ret retVal
+end func
+
+func int2bin(num: int): []bit8
+	var retVal: []bit8 :: #[8]bit8
+	var i: int :: 0
+	while(num <> 0)
+		do retVal[i] :: (num % 256) $ bit8
+		do i :+ 1
+		do num :/ 256
+	end while
+	ret retVal
+end func

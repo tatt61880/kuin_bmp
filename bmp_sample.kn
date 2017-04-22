@@ -1,6 +1,6 @@
 {{{
 	bmp_sample.kn
-		Last Modified: 2017/01/11 00:57:10.
+		Last Modified: 2017/04/22 18:43:26.
 		Created by Tatt(@tatt61880)
 		https://twitter.com/tatt61880
 		https://github.com/tatt61880
@@ -10,8 +10,8 @@ const pixelSize: float :: 5.0
 
 func main()
 	var inputFileName: []char
-	if(^cui@cmdLine() > 0)
-		do inputFileName :: cui@cmdLine()[0]
+	if(^lib@cmdLine() > 0)
+		do inputFileName :: lib@cmdLine()[0]
 	else
 		do inputFileName :: "image.bmp"
 	end if
@@ -34,7 +34,7 @@ func main()
 			do image_b.setPixel(x, y, (#\bmp@Rgba).init(0b8, 0b8, img.getPixel(x, y).b, 255b8))
 		end for
 	end for
-	do image_r.save("image_r.bmp", \bmp@Filetype#bmp24bit)
-	do image_g.save("image_g.bmp", \bmp@Filetype#bmp24bit)
-	do image_b.save("image_b.bmp", \bmp@Filetype#bmp24bit)
+	do image_r.save("image_r.bmp", %bmp24bit)
+	do image_g.save("image_g.bmp", %bmp24bit)
+	do image_b.save("image_b.bmp", %bmp24bit)
 end func
