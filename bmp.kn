@@ -1,6 +1,6 @@
 {{{
 	bmp.kn
-		Last Modified: 2017/04/22 19:05:25.
+		Last Modified: 2017/04/30 01:54:02.
 		Created by Tatt(@tatt61880)
 		https://twitter.com/tatt61880
 		https://github.com/tatt61880
@@ -23,7 +23,7 @@ end func
 		do me.width :: width
 		do me.height :: height
 		do me.data :: #[me.height][]@Rgba
-		var white: @Rgba :: (#@Rgba).init(255b8, 255b8, 255b8, 255b8)
+		var white: @Rgba :: @makeRgba(255b8, 255b8, 255b8, 255b8)
 		for y(0, me.height - 1)
 			do me.data[y] :: #[me.width]@Rgba
 			for x(0, me.width - 1)
@@ -223,9 +223,6 @@ end func
 				do reader.write(bin)
 				ret true
 			default
-				{
-				do reader.writeStr("[bmp.kn] 指定されたファイル形式での保存は未実装です。") {TODO}
-				}
 				do cui@print("[bmp.kn] 指定されたファイル形式での保存は未実装です。")
 				ret false
 			end switch
@@ -345,45 +342,16 @@ end class
 	+var g: bit8
 	+var b: bit8
 	+var a: bit8
-	+func init(r: bit8, g: bit8, b: bit8, a: bit8): Rgba
-		do me.r :: r
-		do me.g :: g
-		do me.b :: b
-		do me.a :: a
-		ret me
-	end func
-	*func cmp(t: kuin@Class): int
-		var tt: @Rgba :: t $ @Rgba
-		if(me.r = tt.r & me.g = tt.g & me.b = tt.b & me.a = tt.a)
-			ret 0
-		end if
-		if(me.r > tt.r)
-			ret 1
-		end if
-		if(me.r < tt.r)
-			ret -1
-		end if
-		if(me.g > tt.g)
-			ret 1
-		end if
-		if(me.g < tt.g)
-			ret -1
-		end if
-		if(me.b > tt.b)
-			ret 1
-		end if
-		if(me.b < tt.b)
-			ret -1
-		end if
-		if(me.a > tt.a)
-			ret 1
-		end if
-		if(me.a < tt.a)
-			ret -1
-		end if
-		ret 0
-	end func
 end class
+
++func makeRgba(r: bit8, g: bit8, b: bit8, a: bit8): @Rgba
+	var rgba: @Rgba :: #@Rgba
+	do rgba.r :: r
+	do rgba.g :: g
+	do rgba.b :: b
+	do rgba.a :: a
+	ret rgba
+end func
 
 +enum Filetype
 	bmp1bit
