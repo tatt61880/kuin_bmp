@@ -1,6 +1,6 @@
 {{{
 	bmp.kn
-		Last Modified: 2017/04/30 01:54:02.
+		Last Modified: 2017/12/16 19:12:50.
 		Created by Tatt(@tatt61880)
 		https://twitter.com/tatt61880
 		https://github.com/tatt61880
@@ -40,7 +40,7 @@ end func
 			do me.height :: bmp.getHeight()
 			do me.data :: bmp.getData()
 		else
-			do cui@print("[bmp.kn] Windows用のBMP形式画像（マジックナンバー=BM）以外には未対応です。\n")
+			;do cui@print("[bmp.kn] Windows用のBMP形式画像（マジックナンバー=BM）以外には未対応です。\n")
 			assert false
 		end if
 		ret me
@@ -55,9 +55,9 @@ end func
 	end func
 
 	class Bmp()
-		var width: int
-		var height: int
-		var data: [][]@Rgba
+		var bmpWidth: int
+		var bmpHeight: int
+		var bmpData: [][]@Rgba
 
 		var bmph: BitmapFileHeader
 		var dibh: DibHeader
@@ -70,8 +70,8 @@ end func
 			end if
 			do me.bmph :: (#BitmapFileHeader).read(reader)
 			do me.dibh :: (#DibHeader).read(reader)
-			do me.width :: me.dibh.width
-			do me.height :: me.dibh.height
+			do me.bmpWidth :: me.dibh.dibWidth
+			do me.bmpHeight :: me.dibh.dibHeight
 
 			{readerからカラーパレットを読み込む}
 			switch bpp(me.dibh.getBpp())
@@ -88,80 +88,80 @@ end func
 			case 24
 			case 32
 			default
-				do cui@print("[bmp.kn] 1ピクセルあたりのビット数(bpp: bit per pixel)が異常です。\n")
+				;do cui@print("[bmp.kn] 1ピクセルあたりのビット数(bpp: bit per pixel)が異常です。\n")
 				assert false
 			end switch
 
 			{readerからbitmapを読み込む}
-			do me.data :: #[me.height][]@Rgba
-			for y(0, me.height - 1)
-				do me.data[y] :: #[me.width]@Rgba
-				for x(0, me.width - 1)
-					do me.data[y][x] :: #@Rgba
+			do me.bmpData :: #[me.bmpHeight][]@Rgba
+			for y(0, me.bmpHeight - 1)
+				do me.bmpData[y] :: #[me.bmpWidth]@Rgba
+				for x(0, me.bmpWidth - 1)
+					do me.bmpData[y][x] :: #@Rgba
 				end for
 			end for
 
-			var xSize: int :: me.width * me.dibh.getBpp() / 8 + 3
+			var xSize: int :: me.bmpWidth * me.dibh.getBpp() / 8 + 3
 			do xSize :- xSize % 4
 
 			switch bpp(me.dibh.getBpp())
 			case 1
-				for y(0, me.height - 1)
+				for y(0, me.bmpHeight - 1)
 					var bin: []bit8 :: reader.read(xSize)
-					for x(0, me.width - 1)
-						do me.data[y][x] :: me.palette[bin[x / 8].shr(7 - x % 8).and(1 $ bit8) $ int]
+					for x(0, me.bmpWidth - 1)
+						do me.bmpData[y][x] :: me.palette[bin[x / 8].shr(7 - x % 8).and(1 $ bit8) $ int]
 					end for
 				end for
 			case 2
-				for y(0, me.height - 1)
+				for y(0, me.bmpHeight - 1)
 					var bin: []bit8 :: reader.read(xSize)
-					for x(0, me.width - 1)
-						do me.data[y][x] :: me.palette[bin[x / 4].shr((3 - x % 4) * 2).and(3 $ bit8) $ int]
+					for x(0, me.bmpWidth - 1)
+						do me.bmpData[y][x] :: me.palette[bin[x / 4].shr((3 - x % 4) * 2).and(3 $ bit8) $ int]
 					end for
 				end for
 			case 4
-				for y(0, me.height - 1)
+				for y(0, me.bmpHeight - 1)
 					var bin: []bit8 :: reader.read(xSize)
-					for x(0, me.width - 1)
-						do me.data[y][x] :: me.palette[bin[x / 2].shr((1 - x % 2) * 4).and(15 $ bit8) $ int]
+					for x(0, me.bmpWidth - 1)
+						do me.bmpData[y][x] :: me.palette[bin[x / 2].shr((1 - x % 2) * 4).and(15 $ bit8) $ int]
 					end for
 				end for
 			case 8
-				for y(0, me.height - 1)
+				for y(0, me.bmpHeight - 1)
 					var bin: []bit8 :: reader.read(xSize)
-					for x(0, me.width - 1)
-						do me.data[y][x] :: me.palette[bin[x] $ int]
+					for x(0, me.bmpWidth - 1)
+						do me.bmpData[y][x] :: me.palette[bin[x] $ int]
 					end for
 				end for
 			case 16
-				for y(0, me.height - 1)
+				for y(0, me.bmpHeight - 1)
 					var bin: []bit8 :: reader.read(xSize)
-					for x(0, me.width - 1)
-						do me.data[y][x] :: me.palette[bin[2 * x] $ int + bin[2 * x + 1] $ int * 255]
+					for x(0, me.bmpWidth - 1)
+						do me.bmpData[y][x] :: me.palette[bin[2 * x] $ int + bin[2 * x + 1] $ int * 255]
 					end for
 				end for
 			case 24
-				for y(0, me.height - 1)
+				for y(0, me.bmpHeight - 1)
 					var bin: []bit8 :: reader.read(xSize)
-					for x(0, me.width - 1)
-						do me.data[y][x].b :: bin[3 * x + 0]
-						do me.data[y][x].g :: bin[3 * x + 1]
-						do me.data[y][x].r :: bin[3 * x + 2]
-						do me.data[y][x].a :: 255 $ bit8 {不透明}
+					for x(0, me.bmpWidth - 1)
+						do me.bmpData[y][x].b :: bin[3 * x + 0]
+						do me.bmpData[y][x].g :: bin[3 * x + 1]
+						do me.bmpData[y][x].r :: bin[3 * x + 2]
+						do me.bmpData[y][x].a :: 255 $ bit8 {不透明}
 					end for
 				end for
 			case 32
-				for y(0, me.height - 1)
+				for y(0, me.bmpHeight - 1)
 					var bin: []bit8 :: reader.read(xSize)
-					for x(0, me.width - 1)
-						do me.data[y][x].b :: bin[4 * x + 0]
-						do me.data[y][x].g :: bin[4 * x + 1]
-						do me.data[y][x].r :: bin[4 * x + 2]
-						do me.data[y][x].a :: bin[4 * x + 3]
+					for x(0, me.bmpWidth - 1)
+						do me.bmpData[y][x].b :: bin[4 * x + 0]
+						do me.bmpData[y][x].g :: bin[4 * x + 1]
+						do me.bmpData[y][x].r :: bin[4 * x + 2]
+						do me.bmpData[y][x].a :: bin[4 * x + 3]
 					end for
 				end for
 			default
-				do cui@print("[bmp.kn] 1ピクセルあたりのビット数(bpp: bit per pixel)が異常です。\n")
+				;do cui@print("[bmp.kn] 1ピクセルあたりのビット数(bpp: bit per pixel)が異常です。\n")
 				assert false
 			end switch
 
@@ -223,21 +223,21 @@ end func
 				do reader.write(bin)
 				ret true
 			default
-				do cui@print("[bmp.kn] 指定されたファイル形式での保存は未実装です。")
+				;do cui@print("[bmp.kn] 指定されたファイル形式での保存は未実装です。")
 				ret false
 			end switch
 		end func
 
 		+func getWidth(): int
-			ret me.width
+			ret me.bmpWidth
 		end func
 
 		+func getHeight(): int
-			ret me.height
+			ret me.bmpHeight
 		end func
 
 		+func getData(): [][]@Rgba
-			ret me.data
+			ret me.bmpData
 		end func
 
 		class BitmapFileHeader()
@@ -261,8 +261,8 @@ end func
 
 		class DibHeader()
 			var meHeaderSize: int
-			+var width: int
-			+var height: int
+			+var dibWidth: int
+			+var dibHeight: int
 			var planeNum: int
 			var bpp: int
 			var compressMethod: CompressMethod
@@ -275,18 +275,18 @@ end func
 				;do cui@print("[bmp.kn] reader.getPos() = " ~ reader.getPos().toStr() ~ "\n")
 				do me.meHeaderSize :: @bin2int(reader.read(4))
 				if(me.meHeaderSize <> 40)
-					do cui@print("[bmp.kn] BITMAPINFOHEADER以外の情報ヘッダを持つBMP画像には未対応です。\n")
-					do cui@print("[bmp.kn] ヘッダサイズ: " ~ me.meHeaderSize.toStr() ~ "\n")
+					;do cui@print("[bmp.kn] BITMAPINFOHEADER以外の情報ヘッダを持つBMP画像には未対応です。\n")
+					;do cui@print("[bmp.kn] ヘッダサイズ: " ~ me.meHeaderSize.toStr() ~ "\n")
 					assert false
 				end if
-				do me.width :: @bin2int(reader.read(4))
-				do me.height :: @bin2int(reader.read(4))
-				;do cui@print("[bmp.kn] width = " ~ me.width.toStr() ~ ", height = " ~ me.height.toStr() ~ "\n")
+				do me.dibWidth :: @bin2int(reader.read(4))
+				do me.dibHeight :: @bin2int(reader.read(4))
+				;do cui@print("[bmp.kn] dibWidth = " ~ me.dibWidth.toStr() ~ ", dibHeight = " ~ me.dibHeight.toStr() ~ "\n")
 				do me.planeNum :: @bin2int(reader.read(2))
 				do me.bpp :: @bin2int(reader.read(2))
 				do me.compressMethod :: @bin2int(reader.read(4)) $ CompressMethod
 				if(me.compressMethod <> %BI_RGB)
-					do cui@print("[bmp.kn] BI_RGB以外の圧縮形式のBMP画像には未対応です。\n")
+					;do cui@print("[bmp.kn] BI_RGB以外の圧縮形式のBMP画像には未対応です。\n")
 					assert false
 				end if
 				do me.imgSize :: @bin2int(reader.read(4))
@@ -365,10 +365,10 @@ end enum
 func bin2int(bin: []bit8): int
 	var retVal: int :: 0
 	var x: int :: 1
-	foreach b(bin)
-		do retVal :+ b $ int
+	for i(0, ^bin - 1)
+		do retVal :+ bin[i] $ int
 		do x :* 256
-	end foreach
+	end for
 	ret retVal
 end func
 
