@@ -1,6 +1,5 @@
 {{{
 	bmp_sample.kn
-		Last Modified: 2017/04/30 01:50:09.
 		Created by Tatt(@tatt61880)
 		https://twitter.com/tatt61880
 		https://github.com/tatt61880
@@ -21,6 +20,7 @@ func main()
 		do img :: \bmp@load(inputFileName)
 	catch
 		do cui@print("LoadError\n")
+		ret
 	end try
 	var image_r: \bmp@Image :: ##img
 	var image_g: \bmp@Image :: ##img

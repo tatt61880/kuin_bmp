@@ -1,6 +1,5 @@
 {{{
 	bmp.kn
-		Last Modified: 2017/12/16 19:12:50.
 		Created by Tatt(@tatt61880)
 		https://twitter.com/tatt61880
 		https://github.com/tatt61880
@@ -18,7 +17,7 @@ end func
 	var width: int
 	var height: int
 	var data: [][]@Rgba
-
+	
 	+func new(width: int, height: int): @Image
 		do me.width :: width
 		do me.height :: height
@@ -32,7 +31,7 @@ end func
 		end for
 		ret me
 	end func
-
+	
 	+func load(path: []char): @Image
 		if((#Bmp).isBmp(path))
 			var bmp: Bmp :: (#Bmp).load(path)
@@ -45,7 +44,7 @@ end func
 		end if
 		ret me
 	end func
-
+	
 	+func save(path: []char, type: @Filetype): bool
 		switch(type)
 		case %bmp24bit
@@ -53,16 +52,16 @@ end func
 		end switch
 		ret false
 	end func
-
+	
 	class Bmp()
 		var bmpWidth: int
 		var bmpHeight: int
 		var bmpData: [][]@Rgba
-
+		
 		var bmph: BitmapFileHeader
 		var dibh: DibHeader
 		var palette: []@Rgba
-
+		
 		+func load(path: []char): Bmp
 			var reader: file@Reader :: file@makeReader(path)
 			if(reader =& null)
@@ -72,12 +71,12 @@ end func
 			do me.dibh :: (#DibHeader).read(reader)
 			do me.bmpWidth :: me.dibh.dibWidth
 			do me.bmpHeight :: me.dibh.dibHeight
-
+			
 			{readerからカラーパレットを読み込む}
 			switch bpp(me.dibh.getBpp())
 			case 1, 2, 4, 8, 16
 				do me.palette :: #[2 ^ bpp]@Rgba
-				for i(0, 2^bpp - 1)
+				for i(0, 2 ^ bpp - 1)
 					do me.palette[i] :: #@Rgba
 					do me.palette[i].b :: reader.read(1)[0]
 					do me.palette[i].g :: reader.read(1)[0]
@@ -91,7 +90,7 @@ end func
 				;do cui@print("[bmp.kn] 1ピクセルあたりのビット数(bpp: bit per pixel)が異常です。\n")
 				assert false
 			end switch
-
+			
 			{readerからbitmapを読み込む}
 			do me.bmpData :: #[me.bmpHeight][]@Rgba
 			for y(0, me.bmpHeight - 1)
@@ -100,10 +99,10 @@ end func
 					do me.bmpData[y][x] :: #@Rgba
 				end for
 			end for
-
+			
 			var xSize: int :: me.bmpWidth * me.dibh.getBpp() / 8 + 3
 			do xSize :- xSize % 4
-
+			
 			switch bpp(me.dibh.getBpp())
 			case 1
 				for y(0, me.bmpHeight - 1)
@@ -164,10 +163,10 @@ end func
 				;do cui@print("[bmp.kn] 1ピクセルあたりのビット数(bpp: bit per pixel)が異常です。\n")
 				assert false
 			end switch
-
+			
 			ret me
 		end func
-
+		
 		+func save(img: @Image, path: []char, type: @Filetype): bool
 			var reader: file@Writer :: file@makeWriter(path, false)
 			if(reader =& null)
@@ -205,10 +204,10 @@ end func
 				do bin[35] :: binDatasize[1]
 				do bin[36] :: binDatasize[2]
 				do bin[37] :: binDatasize[3]
-				do bin[38] :: 16#C4b8 {水平解像度}
-				do bin[39] :: 16#0Eb8 {水平解像度}
-				do bin[42] :: 16#C4b8 {垂直解像度}
-				do bin[43] :: 16#0Eb8 {垂直解像度}
+				do bin[38] :: 0xC4b8 {水平解像度}
+				do bin[39] :: 0x0Eb8 {水平解像度}
+				do bin[42] :: 0xC4b8 {垂直解像度}
+				do bin[43] :: 0x0Eb8 {垂直解像度}
 				var p: @Rgba
 				var offset: int
 				for y(0, img.getHeight() - 1)
@@ -227,26 +226,26 @@ end func
 				ret false
 			end switch
 		end func
-
+		
 		+func getWidth(): int
 			ret me.bmpWidth
 		end func
-
+		
 		+func getHeight(): int
 			ret me.bmpHeight
 		end func
-
+		
 		+func getData(): [][]@Rgba
 			ret me.bmpData
 		end func
-
+		
 		class BitmapFileHeader()
 			var id: []bit8
 			var filesize: int
 			var reserved1: []bit8
 			var reserved2: []bit8
 			var offset: int
-
+			
 			+func read(reader: file@Reader): BitmapFileHeader
 				do reader.setPos(%head, 0)
 				do me.id :: reader.read(2)
@@ -258,7 +257,7 @@ end func
 				ret me
 			end func
 		end class
-
+		
 		class DibHeader()
 			var meHeaderSize: int
 			+var dibWidth: int
@@ -297,11 +296,11 @@ end func
 				;do cui@print("[bmp.kn] bpp = " ~ (me.bpp).toStr() ~ "\n")
 				ret me
 			end func
-
+			
 			+func getBpp(): int
 				ret me.bpp
 			end func
-
+			
 			enum CompressMethod
 				BI_RGB
 				BI_RLE8
@@ -312,26 +311,31 @@ end func
 				BI_ALPHABITFIELDS
 			end enum
 		end class
-
+		
 		+func isBmp(path: []char): bool
 			var reader: file@Reader :: file@makeReader(path)
+			if(reader =& null)
+				do cui@print("Read \{path} failed.\n")
+				do cui@print("(Current dir = \{file@getCurDir()})\n")
+				ret false
+			end if
 			var id: []bit8 :: reader.read(2)
 			ret ((id[0] $ char) = 'B' & (id[1] $ char) = 'M')
 		end func
 	end class
-
+	
 	+func getWidth(): int
 		ret me.width
 	end func
-
+	
 	+func getHeight(): int
 		ret me.height
 	end func
-
+	
 	+func getPixel(x: int, y: int): @Rgba
 		ret me.data[y][x]
 	end func
-
+	
 	+func setPixel(x: int, y: int, d: @Rgba)
 		do me.data[y][x] :: ##d
 	end func
